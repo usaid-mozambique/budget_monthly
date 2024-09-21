@@ -9,7 +9,6 @@ AVAIL_FOR_SUBOBL_AMT_FILTER <- 1
 OPERATING_UNIT_FILTER <- "MOZAMBIQUE" 
 
 
-#TODO: column missing in bi_acc_lines in blingr.  Check all columns exist
 #CLEAN ONE FILE ----------------------------------------------------
 
 #raw data from phoenix
@@ -20,7 +19,7 @@ bi_acc_lines_data <- readxl::read_excel(bi_acc_lines_file)
 
 #clean data - keep non_pepfar data with a minimum avail for subobl amount
 bi_acc_lines_non_pepfar <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data) |> 
-    filter(`Program Area` != PROGRMA_AREA_EXCLUDE_FILTER,
+    filter(`Program Area` != PROGRAM_AREA_EXCLUDE_FILTER,
            `Funding Office Code` == FUNDING_OFFICE_CODE_FILTER,
            `Avail for Subobl Amt` > AVAIL_FOR_SUBOBL_AMT_FILTER)
 
@@ -38,10 +37,9 @@ non_pepfar_open_commitments <- blingr::clean_phoenix_open_commitments(open_commi
     filter(
         funding_office_code == FUNDING_OFFICE_CODE_FILTER,
         program_area != PROGRAM_AREA_EXCLUDE_FILTER,
-           operating_unit == OPERATING_UNIT_FILTER
-)
+        operating_unit == OPERATING_UNIT_FILTER
+    )
 
-unique(non_pepfar_open_commitments$operating_unit)
 
 #write data
 write_csv(non_pepfar_open_commitments, "Dataout/non_pepfar_open_commitments.csv")
@@ -57,14 +55,12 @@ bi_acc_lines_all_files <- dir(BI_ACC_LINES_HISTORY_PATH,
                               full.name = TRUE,
                               pattern = "*.xlsx")
 
-#TODO add comments
 #combine all datasets into one and add period based on file name: Reshape and add comments
-all_bi_acc_lines <- map(bi_acc_lines_all_files, ~ blingr::create_history_bi_oblg_acc_lines(.x, FALSE)) |> 
-    bind_rows() |> 
-    drop_na(Value)
+non_pepfar_all_bi_acc_lines <- map(bi_acc_lines_all_files, ~ blingr::create_history_bi_oblg_acc_lines(.x, FALSE)) |> 
+    bind_rows()
 
 #write data
-write_csv(all_bi_acc_lines, "Dataout/non_pepfar_all_bi_oblg_acc_lines.csv")
+write_csv(non_pepfar_all_bi_acc_lines, "Dataout/non_pepfar_all_bi_oblg_acc_lines.csv")
 
 #path where all files are stored.  They should be in the same format
 OPEN_COMMITMENTS_HISTORY_PATH <-  "Data/open_commitment/processed/non_pepfar"
