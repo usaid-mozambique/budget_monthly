@@ -2,12 +2,6 @@ library(tidyverse)
 library(blingr)
 
 
-#-----------------------------------------------------------------
-PROGRAM_AREA_EXCLUDE_FILTER <- "HL.1" #PEPFAR program area
-AVAIL_FOR_SUBOBL_AMT_FILTER <- 1
-OPERATING_UNIT_FILTER <- "MOZAMBIQUE" 
-
-
 #CLEAN ONE FILE ----------------------------------------------------
 
 #raw data from phoenix
@@ -17,12 +11,10 @@ bi_acc_lines_file <-  "Data/bi_acc_lines/raw/Bilateral Accounting Lines.xlsx"
 bi_acc_lines_data <- readxl::read_excel(bi_acc_lines_file)
 
 #clean data - keep non_pepfar data with a minimum avail for subobl amount
-bi_acc_lines_non_pepfar <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data) |> 
-    filter(`Program Area` != PROGRAM_AREA_EXCLUDE_FILTER,
-           `Avail for Subobl Amt` > AVAIL_FOR_SUBOBL_AMT_FILTER)
+bi_acc_lines <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data) 
 
 #write data
-write_csv(bi_acc_lines_non_pepfar, "Dataout/non_pepfar_bi_oblg_acc_lines_test.csv")
+write_csv(bi_acc_lines, "Dataout/bi_oblg_acc_lines_test.csv")
 
 #raw data from phoenix
 open_commitments_file <- "Data/open_commitment/raw/Phoenix_Open Commitments Detailed.xlsx"
@@ -31,15 +23,11 @@ open_commitments_file <- "Data/open_commitment/raw/Phoenix_Open Commitments Deta
 open_commitments_data <- readxl::read_xlsx(open_commitments_file)
 
 #clean data - keep non_pepfar data from Mozambique operating unit
-non_pepfar_open_commitments <- blingr::clean_phoenix_open_commitments(open_commitments_data) |> 
-    filter(
-        program_area != PROGRAM_AREA_EXCLUDE_FILTER,
-        operating_unit == OPERATING_UNIT_FILTER
-    )
+open_commitments <- blingr::clean_phoenix_open_commitments(open_commitments_data) 
 
 
 #write data
-write_csv(non_pepfar_open_commitments, "Dataout/non_pepfar_open_commitments.csv")
+write_csv(open_commitments, "Dataout/non_pepfar_open_commitments.csv")
 
 
 #COMBINE ALL MONTHS.  After data has been udpated by team ------------------------------------------------------

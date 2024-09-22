@@ -2,13 +2,6 @@ library(tidyverse)
 library(blingr)
 
 
-
-#FILTERS------------------------------------------------------------
-
-AVAIL_FOR_SUBOBL_AMT_FILTER <- 1
-PROGRAM_AREA_FILTER <- "HL.1"  #PEPFAR program area
-
-
 #CLEAN ONE FILE ----------------------------------------------------
 
 #raw data from phoenix
@@ -18,13 +11,10 @@ bi_acc_lines_file = "Data/bi_acc_lines/raw/Bilateral Accounting Lines.xlsx"
 bi_acc_lines_data <- readxl::read_excel(bi_acc_lines_file)
 
 #clean data - keep pepfar data with a minimum avail for subobl amount
-bi_acc_lines_pepfar <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data)|> 
-    filter(`Program Area` == PROGRAM_AREA_FILTER,
-           `Avail for Subobl Amt` > AVAIL_FOR_SUBOBL_AMT_FILTER
-    )
+bi_acc_lines <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data)
 
 #write data
-write_csv(bi_acc_lines_pepfar, "Dataout/pepfar_bi_oblg_acc_lines.csv")
+write_csv(bi_acc_lines, "Dataout/bi_oblg_acc_lines.csv")
 
 
 #raw data from phoenix
@@ -34,11 +24,10 @@ open_commitments_file <- "Data/open_commitment/raw/Phoenix_Open Commitments Deta
 open_commitments_data <- readxl::read_xlsx(open_commitments_file)
 
 #clean data - keep pepfar data from Mozambique operating unit
-pepfar_open_commitments <- blingr::clean_phoenix_open_commitments(open_commitments_data) |> 
-    filter(program_area == PROGRAM_AREA_FILTER)
+open_commitments <- blingr::clean_phoenix_open_commitments(open_commitments_data)
 
 #write data
-write_csv(pepfar_open_commitments, "Dataout/pepfar_open_commitments.csv")
+write_csv(open_commitments, "Dataout/open_commitments.csv")
 
 
 #CREATE HISTORY------------------------------------------------------
