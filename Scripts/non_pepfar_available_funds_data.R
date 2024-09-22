@@ -4,7 +4,6 @@ library(blingr)
 
 #-----------------------------------------------------------------
 PROGRAM_AREA_EXCLUDE_FILTER <- "HL.1" #PEPFAR program area
-FUNDING_OFFICE_CODE_FILTER <- "IHO"
 AVAIL_FOR_SUBOBL_AMT_FILTER <- 1
 OPERATING_UNIT_FILTER <- "MOZAMBIQUE" 
 
@@ -20,7 +19,6 @@ bi_acc_lines_data <- readxl::read_excel(bi_acc_lines_file)
 #clean data - keep non_pepfar data with a minimum avail for subobl amount
 bi_acc_lines_non_pepfar <- blingr::clean_phoenix_bi_oblg_acc_lines(bi_acc_lines_data) |> 
     filter(`Program Area` != PROGRAM_AREA_EXCLUDE_FILTER,
-           `Funding Office Code` == FUNDING_OFFICE_CODE_FILTER,
            `Avail for Subobl Amt` > AVAIL_FOR_SUBOBL_AMT_FILTER)
 
 #write data
@@ -35,7 +33,6 @@ open_commitments_data <- readxl::read_xlsx(open_commitments_file)
 #clean data - keep non_pepfar data from Mozambique operating unit
 non_pepfar_open_commitments <- blingr::clean_phoenix_open_commitments(open_commitments_data) |> 
     filter(
-        funding_office_code == FUNDING_OFFICE_CODE_FILTER,
         program_area != PROGRAM_AREA_EXCLUDE_FILTER,
         operating_unit == OPERATING_UNIT_FILTER
     )
