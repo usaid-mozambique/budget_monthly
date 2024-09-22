@@ -1,5 +1,6 @@
 library(tidyverse)
 library(blingr)
+library(janitor)
 
 
 #CLEAN ONE FILE ----------------------------------------------------
@@ -32,6 +33,11 @@ write_csv(open_commitments, "Dataout/open_commitments.csv")
 
 #CREATE HISTORY------------------------------------------------------
 
+DOAG_DATE <- readxl::read_xlsx("Data/DOAG Amendment Obligation Dates.xlsx") |> 
+    clean_names() |> 
+    select(-c(amendment_number, development_objective))
+
+
 #path where all files are stored.  They should be in the same format
 BI_ACC_LINES_HISTORY_PATH = "Data/bi_acc_lines/processed/pepfar/"
 
@@ -41,7 +47,8 @@ bi_acc_lines_all_files <- dir(BI_ACC_LINES_HISTORY_PATH,
                               pattern = "*.xlsx")
 
 pepfar_all_bi_acc_lines <- map(bi_acc_lines_all_files, ~ blingr::create_history_bi_oblg_acc_lines(.x, TRUE)) |> 
-    bind_rows()
+    bind_rows() |> 
+    left_join(DOAG_DATE, by = c('Document Number' = "document_number")) 
     
 
 #write data

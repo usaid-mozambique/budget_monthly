@@ -60,8 +60,7 @@ transaction_input_file <- dir(TRANSACTION_PATH,
 
 phoenix_transaction_df <- map(transaction_input_file, ~ blingr::clean_phoenix_transaction(.x, 
                         active_awards_number,
-                        DISTRIBUTION_FILTER, 
-                        "month")
+                        DISTRIBUTION_FILTER)
                       ) |> 
   bind_rows() |> 
   distinct()  #remove any duplicate rows
@@ -72,7 +71,10 @@ phoenix_transaction_df <- map(transaction_input_file, ~ blingr::clean_phoenix_tr
 # 1. Obligation Accounting Lines
 
 
-# 1. Transaction NB:  no accruals (main difference from QFR) ----
+
+
+
+# 2. Transaction NB:  no accruals (main difference from QFR) ----
 active_awards_one_row_transaction <- active_awards_df |> 
   select(award_number, activity_name) |> 
   distinct() |> #needed as there are multiple lines due to period
