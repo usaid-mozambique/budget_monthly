@@ -64,6 +64,3 @@ pepfar_all_open_commitments <- map(open_commitments_all_files, blingr::create_hi
 write_csv(pepfar_all_open_commitments, "Dataout/pepfar_all_open_commitments.csv")
 
 
-
-
-
