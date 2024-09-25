@@ -2,8 +2,8 @@ library(tidyverse)
 library(blingr)
 library(janitor)
 
-
-
+#COMBINE ALL MONTHS.  After data has been udpated by team ------------------------------------------------------
+#1. OBLIGATIONS AND ACCRUALS-----------------------------------------
 DOAG_DATE <- readxl::read_xlsx("Data/DOAG Amendment Obligation Dates.xlsx") |> 
     clean_names() |> 
     select(-c(amendment_number, development_objective))
@@ -17,15 +17,20 @@ bi_acc_lines_all_files <- dir(BI_ACC_LINES_HISTORY_PATH,
                               full.name = TRUE,
                               pattern = "*.xlsx")
 
-pepfar_all_bi_acc_lines <- map(bi_acc_lines_all_files, ~ blingr::create_history_bi_oblg_acc_lines(.x, TRUE)) |> 
+#combine all datasets into one and add period based on file name: Reshape and add comments
+pepfar_all_bi_acc_lines_mech<- map(bi_acc_lines_all_files, ~ blingr::create_bi_oblg_acc_lines_updated_mech(.x, TRUE)) |> 
+    bind_rows() 
+write_csv(pepfar_all_bi_acc_lines_mech, "Dataout/pepfar_all_bi_oblg_acc_lines_mech.csv")
+
+
+pepfar_all_bi_acc_lines_no_mech <- map(bi_acc_lines_all_files, ~ blingr::create_bi_oblg_acc_lines_updated_no_mech(.x, TRUE)) |> 
     bind_rows() |> 
-    left_join(DOAG_DATE, by = c('Document Number' = "document_number")) 
-    
+    select(1:24) |> 
+    left_join(DOAG_DATE, by = c('Document Number' = "document_number"))
 
-#write data
-write_csv(pepfar_all_bi_acc_lines, "Dataout/pepfar_all_bi_oblg_acc_lines.csv")
+write_csv(pepfar_all_bi_acc_lines_no_mech, "Dataout/pepfar_all_bi_oblg_acc_lines_no_mech.csv")
 
-
+#2. OPEN COMMITMENTS-----------------------------------------
 # path to where all files are stored
 OPEN_COMMITMENTS_HISTORY_PATH <-  "Data/open_commitment/processed/pepfar/"
 
@@ -40,4 +45,3 @@ pepfar_all_open_commitments <- map(open_commitments_all_files, blingr::create_hi
 
 #write data
 write_csv(pepfar_all_open_commitments, "Dataout/pepfar_all_open_commitments.csv")
-

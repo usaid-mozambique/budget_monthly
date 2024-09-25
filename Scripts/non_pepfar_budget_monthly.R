@@ -20,10 +20,13 @@ active_awards_input_file <- dir(ACTIVE_AWARDS_FOLDER_PATH,
                                 full.name = TRUE,
                                 pattern = "*.xlsx")
 
-active_awards_df <- map(active_awards_input_file, blingr::clean_active_awards) |> 
+active_awards_df <- map(active_awards_input_file, ~blingr::clean_awards(.x, "Active Awards")) |> 
     bind_rows() |> 
-    filter(!str_detect(activity_name, paste(REMOVE_AWARDS, collapse = "|")))
+    filter(!str_detect(activity_name, paste(REMOVE_AWARDS, collapse = "|"))) |> 
+    mutate(period = lubridate::ym(period)) #convert to date
 
+
+write_csv(active_awards_df, paste0(OUTPUT_PATH, "non_pepfar_active_awards.csv"))
 
 #create list of active award numbers to be used to pull out data from Phoenix
 active_awards_number <-  active_awards_df |> 
@@ -37,9 +40,11 @@ subobligation_input_file <- dir("Data/subobligation_summary/",
                                 full.name = TRUE,
                                 pattern = "*.xlsx")
 
-subobligation_df <- map(subobligation_input_file, blingr::clean_subobligation_summary) |> 
-    bind_rows() 
+subobligation_summary_df <- map(subobligation_input_file, blingr::clean_subobligation_summary) |> 
+    bind_rows() |> 
+  mutate(period = lubridate::ym(period)) #convert to date
 
+write_csv(subobligation_summary_df, paste0(OUTPUT_PATH, "non_pepfar_subobligation_summary.csv"))
 
 #3. Read obligation accounting lines (similar to pipeline) from phoenix----
 obl_acc_lines_input_file <- dir(OBLG_ACC_LINES_PATH,
@@ -53,6 +58,9 @@ phoenix_obl_acc_lines_df <- map(obl_acc_lines_input_file, ~ blingr::clean_phoeni
                         DISTRIBUTION_FILTER)) |> 
   bind_rows()
 
+
+write_csv(phoenix_obl_acc_lines_df, paste0(OUTPUT_PATH, "non_pepfar_phoenix_obl_acc_lines.csv"))
+
 #4. Read transaction data from phoenix and show transaction date monthly----
 transaction_input_file <- dir(TRANSACTION_PATH,
                                 full.name = TRUE,
@@ -63,14 +71,20 @@ phoenix_transaction_df <- map(transaction_input_file, ~ blingr::clean_phoenix_tr
                         DISTRIBUTION_FILTER)
                       ) |> 
   bind_rows() |> 
-  distinct()  #remove any duplicate rows
+  distinct() |>   #remove any duplicate rows
+  blingr::create_phoenix_transaction_cumulative()
 
+write_csv(phoenix_transaction_df, paste0(OUTPUT_PATH, "non_pepfar_phoenix_transaction.csv"))
 
+#-------------do this in Tableau not here
 # CREATE DATASETS -----------------------------------------------------------------------------------
 
 # 1. Obligation Accounting Lines
 
-
+active_awards_one_row <- active_awards_df |> 
+  left_join(phoenix_obl_acc_lines_df, by = c("award_number", "period")) |> 
+  left_join(subobligation_summary_df, by = c("award_number", "period", "program_area"))|> 
+  left_join(phoenix_transaction_df, by = c("award_number", "period", "program_area")) 
 
 
 
@@ -82,9 +96,13 @@ active_awards_one_row_transaction <- active_awards_df |>
   select(award_number, activity_name, transaction_disbursement,
          transaction_obligation, transaction_amt, avg_monthly_exp_rate, 
          period, program_area, transaction_date, program_area_name) |> 
-  filter(!(program_area %in% PROGRAM_AREA_FILTER)) #exclude PEPFAR data
+  filter(!(program_area %in% PROGRAM_AREA_FILTER)) #exclude PEPFAR data HL.1
 
   
 # OUTPUT DATASETS---------------------------------------------------------------
                                                                                   
 write_csv(active_awards_one_row_transaction, paste0(OUTPUT_PATH, "non_pepfar_active_awards_one_row_transaction.csv"))
+
+        
+
+
