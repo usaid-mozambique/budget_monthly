@@ -25,7 +25,6 @@ write_csv(non_pepfar_all_bi_acc_lines_mech, "Dataout/non_pepfar_all_bi_oblg_acc_
 
 non_pepfar_all_bi_acc_lines_no_mech <- map(bi_acc_lines_all_files, ~ blingr::create_bi_oblg_acc_lines_updated_no_mech(.x, FALSE)) |> 
     bind_rows() |> 
-    select(1:24) |> 
     left_join(DOAG_DATE, by = c('Document Number' = "document_number"))
     
 write_csv(non_pepfar_all_bi_acc_lines_no_mech, "Dataout/non_pepfar_all_bi_oblg_acc_lines_no_mech.csv")

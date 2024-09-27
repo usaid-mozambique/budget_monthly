@@ -43,9 +43,8 @@ write_csv(pepfar_all_bi_acc_lines_mech, "Dataout/pepfar_all_bi_oblg_acc_lines_me
 
 pepfar_all_bi_acc_lines_no_mech <- map(bi_acc_lines_all_files, ~ blingr::create_bi_oblg_acc_lines_updated_no_mech(.x, TRUE)) |> 
     bind_rows() |> 
-    select(1:24) |> 
     left_join(DOAG_DATE, by = c('Document Number' = "document_number")) |> 
-    mutate(abbrev = recode(`Program Element`, !!!program_element_map))
+    mutate(abbrev = recode(`Program Element`, !!!program_element_map, .default = ""))
 
 write_csv(pepfar_all_bi_acc_lines_no_mech, "Dataout/pepfar_all_bi_oblg_acc_lines_no_mech.csv")
 
@@ -61,7 +60,7 @@ open_commitments_all_files <- dir(OPEN_COMMITMENTS_HISTORY_PATH,
 #combine all datasets into one and add period based on file name
 pepfar_all_open_commitments <- map(open_commitments_all_files, blingr::create_history_open_commitments)  |> 
     bind_rows() |> 
-    mutate(abbrev = recode(program_element, !!!program_element_map))
+    mutate(abbrev = recode(program_element, !!!program_element_map, .default = ""))
 
 #write data
 write_csv(pepfar_all_open_commitments, "Dataout/pepfar_all_open_commitments.csv")
