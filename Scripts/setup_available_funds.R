@@ -5,7 +5,7 @@ if (!"blingr" %in% installed.packages()[, "Package"]) {
     if (!requireNamespace("remotes", quietly = TRUE)) {
         install.packages("remotes")
     }
-    remotes::install_github("usaid-mozambique/bling")
+    remotes::install_github("usaid-mozambique/blingr")
 }
 
 # Install other missing packages from the specified repos
