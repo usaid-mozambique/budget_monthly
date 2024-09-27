@@ -27,8 +27,8 @@ library(blingr)
 folder_setup() 
 folder_setup(folder_list = list("Data/bi_acc_lines/raw/",   #bilateral accounting lines raw data here - one file at a time
                                 "Data/open_commitment/raw/", #open commitment raw data - one file at a time
-                                "Data/bi_acc_lines/processed/non_pepfar", #processed data for non-pepfar
-                                "Data/open_commitment/processed/non_pepfar", #processed data for non-pepfar
+                                "Data/bi_acc_lines/processed/non_pepfar/", #processed data for non-pepfar
+                                "Data/open_commitment/processed/non_pepfar/", #processed data for non-pepfar
                                 "Data/bi_acc_lines/processed/pepfar/", #processed data for pepfar
                                 "Data/open_commitment/processed/pepfar/"
                                 )
