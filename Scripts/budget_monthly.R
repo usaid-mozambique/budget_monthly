@@ -42,6 +42,7 @@ subobligation_input_file <- dir("Data/subobligation_summary/",
 
 subobligation_summary_df <- map(subobligation_input_file, blingr::clean_subobligation_summary) |> 
     bind_rows() |> 
+  filter(award_number %in% active_awards_number) |>  #only keep active awards
   mutate(period = lubridate::ym(period)) #convert to date
 
 write_csv(subobligation_summary_df, paste0(OUTPUT_PATH, "non_pepfar_subobligation_summary.csv"))
@@ -68,7 +69,8 @@ transaction_input_file <- dir(TRANSACTION_PATH,
 
 phoenix_transaction_df <- map(transaction_input_file, ~ blingr::clean_phoenix_transaction(.x, 
                         active_awards_number,
-                        DISTRIBUTION_FILTER)
+                        DISTRIBUTION_FILTER, 
+                        "month")
                       ) |> 
   bind_rows() |> 
   distinct() |>   #remove any duplicate rows
@@ -84,7 +86,9 @@ write_csv(phoenix_transaction_df, paste0(OUTPUT_PATH, "non_pepfar_phoenix_transa
 active_awards_one_row <- active_awards_df |> 
   left_join(phoenix_obl_acc_lines_df, by = c("award_number", "period")) |> 
   left_join(subobligation_summary_df, by = c("award_number", "period", "program_area"))|> 
-  left_join(phoenix_transaction_df, by = c("award_number", "period", "program_area")) 
+  left_join(phoenix_transaction_df, by = c("award_number",  "period" = "transaction_date" , "program_area")) 
+
+colnames(phoenix_transaction_df)
 
 
 
@@ -95,7 +99,7 @@ active_awards_one_row_transaction <- active_awards_df |>
   left_join(phoenix_transaction_df, by = "award_number") |> 
   select(award_number, activity_name, transaction_disbursement,
          transaction_obligation, transaction_amt, avg_monthly_exp_rate, 
-         period, program_area, transaction_date, program_area_name) |> 
+         period, program_area, transaction_date, program_area_name, cumulative_transaction_disbursement_fy) |> 
   filter(!(program_area %in% PROGRAM_AREA_FILTER)) #exclude PEPFAR data HL.1
 
   

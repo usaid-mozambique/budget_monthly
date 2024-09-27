@@ -1,9 +1,17 @@
-required_packages <- c("tidyverse", "janitor", "glamr","blingr")
+required_packages <- c("tidyverse", "janitor", "glamr", "blingr")
 
-missing_packages <- required_packages[!(required_packages %in% installed.packages()
-                                        [,"Package"])]
+# Install blingr from GitHub if not installed
+if (!"blingr" %in% installed.packages()[, "Package"]) {
+    if (!requireNamespace("remotes", quietly = TRUE)) {
+        install.packages("remotes")
+    }
+    remotes::install_github("usaid-mozambique/bling")
+}
 
-if(length(missing_packages) >0){
+# Install other missing packages from the specified repos
+missing_packages <- setdiff(required_packages, installed.packages()[, "Package"])
+
+if (length(missing_packages) > 0) {
     install.packages(missing_packages, repos = c("https://usaid-oha-si.r-universe.dev",
                                                  "https://cloud.r-project.org"))
 }
